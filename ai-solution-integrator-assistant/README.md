@@ -1,6 +1,6 @@
 # AI Solution Integrator Assistant
 
-Python 3.12 project scaffold using FastAPI, Streamlit, and SQLite.
+Python 3.12 application using FastAPI, Streamlit, and SQLite for flow validation and RCA reporting.
 
 ## Project Structure
 
@@ -20,6 +20,31 @@ requirements.txt
 README.md
 ```
 
+## FastAPI
+
+Run locally:
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+Open:
+
+```text
+http://localhost:8000
+http://localhost:8000/docs
+```
+
+## Streamlit
+
+Run the dashboard while the FastAPI service is running:
+
+```bash
+streamlit run ui/dashboard.py
+```
+
+Set `API_BASE_URL` if the API runs somewhere other than `http://localhost:8000`.
+
 ## Docker
 
 Build the image:
@@ -28,8 +53,15 @@ Build the image:
 docker build -t ai-solution-integrator-assistant .
 ```
 
-Run the default test command:
+Run the application:
 
 ```bash
-docker run --rm ai-solution-integrator-assistant
+docker run --rm -p 8000:8000 ai-solution-integrator-assistant
+```
+
+Open:
+
+```text
+http://localhost:8000
+http://localhost:8000/docs
 ```
