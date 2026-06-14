@@ -25,7 +25,7 @@ README.md
 Run locally:
 
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload
 ```
 
 Open:
@@ -37,13 +37,19 @@ http://localhost:8000/docs
 
 ## Streamlit
 
-Run the dashboard while the FastAPI service is running:
+Run the business frontend while the FastAPI service is running:
 
 ```bash
-streamlit run ui/dashboard.py
+streamlit run ui/streamlit_app.py
 ```
 
 Set `API_BASE_URL` if the API runs somewhere other than `http://localhost:8000`.
+
+The frontend will be available at:
+
+```text
+http://localhost:8501
+```
 
 ## Docker
 

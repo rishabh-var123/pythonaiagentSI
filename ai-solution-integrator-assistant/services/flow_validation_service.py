@@ -7,6 +7,7 @@ from typing import Any
 
 from parsers.flow_parser import FlowParser
 from parsers.log_parser import LogParser
+from services.log_parser_service import LogParserService
 
 
 class FlowValidationService:
@@ -17,11 +18,9 @@ class FlowValidationService:
         self.log_parser = log_parser or LogParser()
 
     def validate_files(self, flow_path: str | Path, log_path: str | Path) -> dict[str, Any]:
-        flow_content = Path(flow_path).read_text(encoding="utf-8")
-        log_content = Path(log_path).read_text(encoding="utf-8")
-
+        flow_content = Path(flow_path).read_text(encoding="utf-8", errors="replace")
         expected_apis = self.flow_parser.parse(flow_content)
-        log_entries = self.log_parser.parse(log_content)
+        log_entries = LogParserService(self.log_parser).parse_file(log_path)
         observed_apis = sorted({str(entry["api"]) for entry in log_entries if entry.get("api")})
 
         missing_apis = sorted(set(expected_apis) - set(observed_apis))

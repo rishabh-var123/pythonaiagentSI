@@ -19,7 +19,7 @@ class LogParserService:
         if path.suffix.lower() == ".zip":
             return self._parse_zip(path)
 
-        content = path.read_text(encoding="utf-8")
+        content = path.read_text(encoding="utf-8", errors="replace")
         return self.parser.parse(content)
 
     def _parse_zip(self, file_path: Path) -> list[dict[str, str | list[str] | None]]:
