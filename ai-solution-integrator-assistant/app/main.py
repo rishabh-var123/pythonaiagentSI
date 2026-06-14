@@ -21,7 +21,8 @@ from services.report_service import RCAReportService
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 UPLOADS_DIR = BASE_DIR / "uploads"
-FLOWS_DIR = BASE_DIR / "flows"
+FLOWS_DIR = UPLOADS_DIR / "flows"
+LOGS_DIR = UPLOADS_DIR / "logs"
 REPORTS_DIR = BASE_DIR / "reports"
 
 app = FastAPI(
@@ -41,7 +42,7 @@ app.add_middleware(
 
 @app.on_event("startup")
 def startup() -> None:
-    for directory in (UPLOADS_DIR, FLOWS_DIR, REPORTS_DIR):
+    for directory in (UPLOADS_DIR, FLOWS_DIR, LOGS_DIR, REPORTS_DIR):
         directory.mkdir(parents=True, exist_ok=True)
     database.init_db()
 
@@ -73,7 +74,7 @@ def health() -> dict[str, str]:
 @app.post("/api/upload-flow", tags=["Upload Flow"])
 def upload_flow(file: Annotated[UploadFile, File(description="Flow definition file")]) -> dict[str, Any]:
     saved_path = save_upload(file, FLOWS_DIR)
-    content = saved_path.read_text(encoding="utf-8")
+    content = read_text_safely(saved_path)
     apis = FlowParser().parse(content)
     upload = database.insert_upload(
         "flow",
@@ -86,7 +87,7 @@ def upload_flow(file: Annotated[UploadFile, File(description="Flow definition fi
 
 @app.post("/api/upload-log", tags=["Upload Log"])
 def upload_log(file: Annotated[UploadFile, File(description="Application log file")]) -> dict[str, Any]:
-    saved_path = save_upload(file, UPLOADS_DIR)
+    saved_path = save_upload(file, LOGS_DIR)
     parsed_entries = LogParserService().parse_file(saved_path)
     upload = database.insert_upload(
         "log",
@@ -140,6 +141,13 @@ def save_upload(file: UploadFile, directory: Path) -> Path:
     with target.open("wb") as output:
         shutil.copyfileobj(file.file, output)
     return target
+
+
+def read_text_safely(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return ""
 
 
 def unique_path(path: Path) -> Path:
